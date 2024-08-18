@@ -9,6 +9,7 @@ import {
   NavigationMenuTrigger,
   NavigationMenuViewport,
 } from "@/components/ui/navigation-menu";
+
 import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
 </script>
 
@@ -35,4 +36,5 @@ import { navigationMenuTriggerStyle } from "@/components/ui/navigation-menu";
       </NavigationMenuItem>
     </NavigationMenuList>
   </NavigationMenu>
+  <slot />
 </template>

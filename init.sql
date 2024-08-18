@@ -1,0 +1,6 @@
+-- init.sql
+CREATE USER sean WITH PASSWORD 'seanyew123';
+CREATE DATABASE checklist WITH OWNER = sean;
+CREATE DATABASE anime WITH OWNER = sean;
+-- ALTER USER sean WITH SUPERUSER;
+
