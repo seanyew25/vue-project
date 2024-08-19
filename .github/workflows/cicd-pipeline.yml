@@ -42,7 +42,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          dockerfile: /Dockerfile.postgres-db
+          file: ${{context}}/Dockerfile.postgres-db
           push: true
           tags: seanyew25/vue-project-db:v2
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -52,7 +52,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          dockerfile: /Dockerfile.vue-project
+          file: ${{context}}/Dockerfile.postgres-db
           push: true
           tags: seanyew25/vue-project-app:v2
           username: ${{ secrets.DOCKER_USERNAME }}
