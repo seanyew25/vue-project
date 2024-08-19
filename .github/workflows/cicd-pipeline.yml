@@ -66,7 +66,7 @@ jobs:
           context: ${{github.workspace}}
           file: ${{github.workspace}}/Dockerfile.postgres-db
           push: true
-          tags: seanyew25/vue-project-db:$TAG
+          tags: seanyew25/vue-project-db:${{ env.TAG }}
 
       - name: Build and push website
         uses: docker/build-push-action@v6
@@ -74,7 +74,7 @@ jobs:
           context: ${{github.workspace}}
           file: ${{github.workspace}}/Dockerfile.vue-project
           push: true
-          tags: seanyew25/vue-project-app:$TAG
+          tags: seanyew25/vue-project-app:${{ env.TAG }}
 
   deploy:
     needs: publish
@@ -99,8 +99,8 @@ jobs:
 
       - name: pull images from docker
         run: |
-          docker pull seanyew25/vue-project-db:$TAG
-          docker pull seanyew25/vue-project-app:$TAG
+          docker pull seanyew25/vue-project-db:${{ env.TAG }}
+          docker pull seanyew25/vue-project-app:${{ env.TAG }}
 
       - name: docker compose
         run: docker compose up
