@@ -98,6 +98,59 @@ jobs:
         run: |
           echo "TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
+      - name: Create Docker Compose template
+        run: |
+          cat <<EOF > docker-compose.yml
+          services:
+            app:
+              image: seanyew25/vue-project-app:{{TAG}}
+              container_name: vue-project
+              restart: unless-stopped
+              ports:
+                - 3000:3000
+              depends_on:
+                - db
+
+            db:
+              image: seanyew25/vue-project-db:{{TAG}}
+              container_name: postgres-db
+              environment:
+                POSTGRES_PASSWORD: seanyew123
+              restart: unless-stopped
+              volumes:
+                - pgdata:/var/lib/postgresql/data
+
+              ports:
+                - "5432:5432"
+
+            pgadmin:
+              image: dpage/pgadmin4
+              restart: unless-stopped
+              container_name: nuxt-pgadmin
+              environment:
+                - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+                - PGADMIN_DEFAULT_PASSWORD=pgadmin4
+              ports:
+                - "5050:80"
+              depends_on:
+                - db
+
+          volumes:
+            pgdata:
+
+      - name: Replace placeholders in Docker Compose file
+        run: |
+          sed "s/{{TAG}}/$TAG/g" docker-compose.template.yml > docker-compose.yml
+
+      - name: copy docker-compose.yml to ec2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_RSA_KEY }}
+          source: "~/docker-compose.yml"
+          target: "~/docker-compose.yml"
+
       - name: ssh into ec2 instance and execute
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -114,10 +167,10 @@ jobs:
             fi
 
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-            docker pull seanyew25/vue-project-db:${{ env.TAG }}
-            docker pull seanyew25/vue-project-app:${{ env.TAG }}
+
+            docker compose pull
             docker compose up -d
-            containers=("seanyew25/vue-project-db" "seanyew25/vue-project-app")
+            containers=("vue-project" "postgres-db")
             for container in "${containers[@]}"; do
               until [ "$(docker inspect -f '{{.State.Health.Status}}' $container)" == "healthy" ]; do
                 echo "Waiting for $container to be healthy..."
