@@ -149,7 +149,7 @@ jobs:
           username: ec2-user
           key: ${{ secrets.EC2_RSA_KEY }}
           source: "~/docker-compose.yml"
-          target: "~/docker-compose.yml"
+          target: "~"
 
       - name: ssh into ec2 instance and execute
         uses: appleboy/ssh-action@v1.0.3
