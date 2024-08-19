@@ -27,7 +27,9 @@ jobs:
 
       - name: Get the commit hash
         id: get_commit_hash
-        run: echo "TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+        run: |
+          echo "TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+          echo ${{ env.TAG }}
 
       - name: Setup Node
         uses: actions/setup-node@v4
