@@ -27,7 +27,7 @@ jobs:
 
       - name: Get the commit hash
         id: get_commit_hash
-        run: echo "TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+        run: echo "TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -66,7 +66,7 @@ jobs:
           context: ${{github.workspace}}
           file: ${{github.workspace}}/Dockerfile.postgres-db
           push: true
-          tags: seanyew25/vue-project-db:${{ env.TAG }}
+          tags: seanyew25/vue-project-db:$TAG
 
       - name: Build and push website
         uses: docker/build-push-action@v6
@@ -74,7 +74,7 @@ jobs:
           context: ${{github.workspace}}
           file: ${{github.workspace}}/Dockerfile.vue-project
           push: true
-          tags: seanyew25/vue-project-app:${{ env.TAG }}
+          tags: seanyew25/vue-project-app:$TAG
 
   deploy:
     needs: publish
@@ -99,8 +99,8 @@ jobs:
 
       - name: pull images from docker
         run: |
-          docker pull seanyew25/vue-project-db:${{ env.TAG }}
-          docker pull seanyew25/vue-project-app:${{ env.TAG }}
+          docker pull seanyew25/vue-project-db:$TAG
+          docker pull seanyew25/vue-project-app:$TAG
 
       - name: docker compose
         run: docker compose up
