@@ -55,6 +55,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get the commit hash
+        id: get_commit_hash
+        run: |
+          echo "TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
       - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -85,26 +90,84 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: ssh into ec2 instance
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get the commit hash
+        id: get_commit_hash
+        run: |
+          echo "TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
+      - name: Create Docker Compose template
+        run: |
+          cat <<EOF > docker-compose.template.yml
+          services:
+            app:
+              image: seanyew25/vue-project-app:{{TAG}}
+              container_name: vue-project
+              restart: unless-stopped
+              ports:
+                - 3000:3000
+              depends_on:
+                - db
+
+            db:
+              image: seanyew25/vue-project-db:{{TAG}}
+              container_name: postgres-db
+              environment:
+                POSTGRES_PASSWORD: seanyew123
+              restart: unless-stopped
+              volumes:
+                - pgdata:/var/lib/postgresql/data
+
+              ports:
+                - "5432:5432"
+
+            pgadmin:
+              image: dpage/pgadmin4
+              restart: unless-stopped
+              container_name: nuxt-pgadmin
+              environment:
+                - PGADMIN_DEFAULT_EMAIL=admin@admin.com
+                - PGADMIN_DEFAULT_PASSWORD=pgadmin4
+              ports:
+                - "5050:80"
+              depends_on:
+                - db
+
+          volumes:
+            pgdata:
+
+      - name: Replace placeholders in Docker Compose file
+        run: |
+          sed "s/{{TAG}}/$TAG/g" docker-compose.template.yml > docker-compose.yml
+
+      - name: secure copy docker-compose.yml to ec2
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_RSA_KEY }}
+          source: "/github/workspace/docker-compose.yml"
+          target: "~"
+          strip_components: 2
+
+      - name: ssh into ec2 instance and deploy website
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_RSA_KEY }}
+          script: |
+            if [ "$(docker ps -a -q)" ]; then
+              docker rm --force $(docker ps -a -q)            
+            fi
 
-      - name: stop existing containers and remove images
-        run: |
-          docker stop $(docker ps -q)
-          docker rm $(docker ps -a -q)
-          docker rmi $(docker images -q)
+            if [ "$(docker images -q)" ]; then
+              docker rmi $(docker images -q)
+            fi
 
-      - name: log into docker
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-      - name: pull images from docker
-        run: |
-          docker pull seanyew25/vue-project-db:${{ env.TAG }}
-          docker pull seanyew25/vue-project-app:${{ env.TAG }}
-
-      - name: docker compose
-        run: docker compose up
+            docker compose pull
+            docker compose up -d
