@@ -1,6 +1,7 @@
 #!/bin/bash
 
 
+
 echo "Restoring the 'anime' database..."
 pg_restore -O -U sean -d anime /backup/anime.sql
 echo "anime database restored"
