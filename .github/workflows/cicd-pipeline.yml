@@ -55,6 +55,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get the commit hash
+        id: get_commit_hash
+        run: |
+          echo "TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
       - name: Set Up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
@@ -63,10 +68,7 @@ jobs:
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
-          
-      - name: view env variable
-        run: echo ${{ env.TAG }}
-        
+
       - name: Build and push database
         uses: docker/build-push-action@v6
         with:
@@ -88,6 +90,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Get the commit hash
+        id: get_commit_hash
+        run: |
+          echo "TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
+
       - name: ssh into ec2 instance
         uses: appleboy/ssh-action@v1.0.3
         with:
