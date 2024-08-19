@@ -98,30 +98,29 @@ jobs:
         run: |
           echo "TAG=$(git rev-parse --short HEAD)" >> "$GITHUB_ENV"
 
-      - name: ssh into ec2 instance
+      - name: ssh into ec2 instance and execute
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ec2-user
           key: ${{ secrets.EC2_RSA_KEY }}
+          script: |
+            if [ "$(docker ps -a -q)" ]; then
+              docker rm --force $(docker ps -a -q)            
+            fi
 
-      - name: stop existing containers and remove images
-        run: |
-          if [ "$(docker ps -a -q)" ]; then
-            docker rm --force $(docker ps -a -q)            
-          fi
+            if [ "$(docker images -q)" ]; then
+              docker rmi $(docker images -q)
+            fi
 
-          if [ "$(docker images -q)" ]; then
-            docker rmi $(docker images -q)
-          fi
-
-      - name: log into docker
-        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
-
-      - name: pull images from docker
-        run: |
-          docker pull seanyew25/vue-project-db:${{ env.TAG }}
-          docker pull seanyew25/vue-project-app:${{ env.TAG }}
-
-      - name: docker compose
-        run: docker compose up
+            echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+            docker pull seanyew25/vue-project-db:${{ env.TAG }}
+            docker pull seanyew25/vue-project-app:${{ env.TAG }}
+            docker compose up -d
+            containers=("seanyew25/vue-project-db" "seanyew25/vue-project-app")
+            for container in "${containers[@]}"; do
+              until [ "$(docker inspect -f '{{.State.Health.Status}}' $container)" == "healthy" ]; do
+                echo "Waiting for $container to be healthy..."
+                sleep 5
+              done
+            done
