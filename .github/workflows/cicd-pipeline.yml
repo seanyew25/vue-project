@@ -142,7 +142,7 @@ jobs:
         run: |
           sed "s/{{TAG}}/$TAG/g" docker-compose.template.yml > docker-compose.yml
 
-      - name: copy docker-compose.yml to ec2
+      - name: secure copy docker-compose.yml to ec2
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -150,8 +150,9 @@ jobs:
           key: ${{ secrets.EC2_RSA_KEY }}
           source: "/github/workspace/docker-compose.yml"
           target: "~"
+          strip_components: 2
 
-      - name: ssh into ec2 instance and execute
+      - name: ssh into ec2 instance and deploy website
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.EC2_HOST }}
@@ -170,10 +171,3 @@ jobs:
 
             docker compose pull
             docker compose up -d
-            containers=("vue-project" "postgres-db")
-            for container in "${containers[@]}"; do
-              until [ "$(docker inspect -f '{{.State.Health.Status}}' $container)" == "healthy" ]; do
-                echo "Waiting for $container to be healthy..."
-                sleep 5
-              done
-            done
