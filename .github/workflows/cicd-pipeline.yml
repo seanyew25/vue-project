@@ -41,8 +41,8 @@ jobs:
       - name: Build and push database
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ${{context}}/Dockerfile.postgres-db
+          context: ${{github.workspace}}
+          file: ${{github.workspace}}/Dockerfile.postgres-db
           push: true
           tags: seanyew25/vue-project-db:v2
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -51,8 +51,8 @@ jobs:
       - name: Build and push website
         uses: docker/build-push-action@v6
         with:
-          context: .
-          file: ${{context}}/Dockerfile.postgres-db
+          context: ${{github.workspace}}
+          file: ${{github.workspace}}/Dockerfile.postgres-db
           push: true
           tags: seanyew25/vue-project-app:v2
           username: ${{ secrets.DOCKER_USERNAME }}
