@@ -25,6 +25,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Get the commit hash
+        id: get_commit_hash
+        run: echo "TAG=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
@@ -62,7 +66,7 @@ jobs:
           context: ${{github.workspace}}
           file: ${{github.workspace}}/Dockerfile.postgres-db
           push: true
-          tags: seanyew25/vue-project-db:v2
+          tags: seanyew25/vue-project-db:${{ env.TAG }}
 
       - name: Build and push website
         uses: docker/build-push-action@v6
@@ -70,16 +74,33 @@ jobs:
           context: ${{github.workspace}}
           file: ${{github.workspace}}/Dockerfile.vue-project
           push: true
-          tags: seanyew25/vue-project-app:v2
+          tags: seanyew25/vue-project-app:${{ env.TAG }}
 
-  # # Deployment job
-  # deploy:
-  #   environment:
-  #     name: github-pages
-  #     url: ${{ steps.deployment.outputs.page_url }}
-  #   runs-on: ubuntu-latest
-  #   needs: build
-  #   steps:
-  #     - name: Deploy to GitHub Pages
-  #       id: deployment
-  #       uses: actions/deploy-pages@v4
+  deploy:
+    needs: publish
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: ssh into ec2 instance
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ec2-user
+          key: ${{ secrets.EC2_RSA_KEY }}
+
+      - name: stop existing containers and remove images
+        run: |
+          docker stop $(docker ps -q)
+          docker rm $(docker ps -a -q)
+          docker rmi $(docker images -q)
+
+      - name: log into docker
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: pull images from docker
+        run: |
+          docker pull seanyew25/vue-project-db:${{ env.TAG }}
+          docker pull seanyew25/vue-project-app:${{ env.TAG }}
+
+      - name: docker compose
+        run: docker compose up
