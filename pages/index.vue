@@ -16,7 +16,6 @@ export default {
       try {
         const response = await fetch("/api/tasks");
         const data = await response.json();
-        console.log(response.json);
         this.tasks = data;
       } catch (error) {
         console.error(error);
