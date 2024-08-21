@@ -1,4 +1,8 @@
 <script>
+definePageMeta({
+  unauthenticatedOnly: false,
+  navigateUnauthenticatedTo: "/login",
+});
 import animeGenreSummary from "./animeGenreSummary.vue";
 import animeYearSummary from "./animeYearSummary.vue";
 

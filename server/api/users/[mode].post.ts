@@ -20,13 +20,11 @@ export default defineEventHandler(async (event) => {
       if (match) {
         const secret: jwt.Secret = process.env.JWT_SECRET as string;
         const token: string = await jwt.sign({ id: response.id }, secret, {
-          expiresIn: "1h",
+          expiresIn: 30 * 60,
         });
         console.log("success");
         console.log(token);
-        localStorage.setItem("id", response.id);
-        localStorage.setItem("token", token);
-        return token;
+        return { token: { bearer: token } };
       } else return "failure";
     } catch (error) {
       console.error(error);
