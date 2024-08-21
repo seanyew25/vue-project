@@ -1,8 +1,4 @@
 <script>
-definePageMeta({
-  unauthenticatedOnly: false,
-  navigateUnauthenticatedTo: "/login",
-});
 import Input from "~/components/ui/input/Input.vue";
 import Post from "./post.vue";
 

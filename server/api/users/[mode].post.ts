@@ -22,10 +22,16 @@ export default defineEventHandler(async (event) => {
         const token: string = await jwt.sign({ id: response.id }, secret, {
           expiresIn: 30 * 60,
         });
-        console.log("success");
-        console.log(token);
-        return { token: { bearer: token } };
-      } else return "failure";
+
+        setCookie(event, "bearer", token, {
+          httpOnly: true,
+          maxAge: 60 * 60, // 1 week
+          secure: false,
+          path: "/",
+        });
+        console.log(getCookie(event, "bearer"));
+        return { status: 200, message: "successfully authenticated" };
+      } else return { status: 401, message: "incorrect password" };
     } catch (error) {
       console.error(error);
       throw error;

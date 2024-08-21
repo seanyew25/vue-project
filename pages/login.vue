@@ -16,6 +16,7 @@ export default {
       username: "",
       email: "",
       password: "",
+      authStatus: false,
     };
   },
   methods: {
@@ -35,6 +36,7 @@ export default {
           },
           body: JSON.stringify(data),
         });
+        if (response.status === 200) navigateTo("/");
       } catch (error) {
         console.error(error);
       }
