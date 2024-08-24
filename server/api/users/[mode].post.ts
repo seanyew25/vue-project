@@ -19,18 +19,34 @@ export default defineEventHandler(async (event) => {
 
       if (match) {
         const secret: jwt.Secret = process.env.JWT_SECRET as string;
-        const token: string = await jwt.sign({ id: response.id }, secret, {
-          expiresIn: 30 * 60,
-        });
+        const accessToken: string = await jwt.sign(
+          { id: response[0].id },
+          secret,
+          {
+            expiresIn: 7 * 60,
+          }
+        );
 
-        setCookie(event, "bearer", token, {
+        const refreshToken: string = await jwt.sign(
+          { id: response[0].id },
+          secret,
+          {
+            expiresIn: 7 * 24 * 60 * 60,
+          }
+        );
+
+        setCookie(event, "bearer", refreshToken, {
           httpOnly: true,
           maxAge: 60 * 60, // 1 week
           secure: false,
           path: "/",
         });
         console.log(getCookie(event, "bearer"));
-        return { status: 200, message: "successfully authenticated" };
+        return {
+          status: 200,
+          message: "successfully authenticated",
+          token: accessToken,
+        };
       } else return { status: 401, message: "incorrect password" };
     } catch (error) {
       console.error(error);
@@ -45,6 +61,31 @@ export default defineEventHandler(async (event) => {
     } catch (error) {
       console.error(error);
       throw error;
+    }
+  } else if (mode === "refresh") {
+    const secret: jwt.Secret = process.env.JWT_SECRET as string;
+    if (getCookie(event, "bearer")) {
+      const refreshToken: string | undefined = getCookie(event, "bearer");
+      try {
+        // @ts-ignore
+        jwt.verify(refreshToken, secret);
+      } catch (error) {
+        console.error(error);
+        return { status: 401, message: "refresh token expired" };
+      }
+      //@ts-ignore
+      const id = jwt.decode(refreshToken, secret);
+      // @ts-ignore
+      const accessToken: string = await jwt.sign({ id: id }, secret, {
+        expiresIn: 7 * 60,
+      });
+      return {
+        status: 200,
+        message: "successfully refreshed",
+        token: accessToken,
+      };
+    } else {
+      return { status: 401, message: "bearer token does not exist" };
     }
   }
 });

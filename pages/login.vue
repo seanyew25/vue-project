@@ -36,7 +36,12 @@ export default {
           },
           body: JSON.stringify(data),
         });
-        if (response.status === 200) navigateTo("/");
+        if (response.status === 200) {
+          const parsedResponse = await response.json();
+          console.log(parsedResponse);
+          localStorage.setItem("token", parsedResponse.token);
+          navigateTo("/");
+        }
       } catch (error) {
         console.error(error);
       }

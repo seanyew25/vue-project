@@ -1,8 +1,37 @@
 <script>
 import animeGenreSummary from "./animeGenreSummary.vue";
 import animeYearSummary from "./animeYearSummary.vue";
+import * as jose from "jose";
 
 export default {
+  setup() {
+    definePageMeta({
+      middleware: [
+        async function (to, from) {
+          const token = localStorage.getItem("token");
+          if (!token) {
+            return navigateTo("/login");
+          } else {
+            // const authStore = useAuthStore();
+            // const isTokenValid = authStore.verifyToken();
+            // jose.decodeJwt;
+            // const isTokenValid = true;
+            const info = jose.decodeJwt(token);
+            const now = Math.floor(Date.now() / 1000);
+            if (info.exp > now) {
+              const response = await fetch("/api/users/refresh");
+              const parsedResponse = await response.json();
+              if (response.status === 200) {
+                localStorage.setItem("token", parsedResponse.token);
+              } else {
+                navigateTo("/login");
+              }
+            }
+          }
+        },
+      ],
+    });
+  },
   components: {
     animeYearSummary,
     animeGenreSummary,
