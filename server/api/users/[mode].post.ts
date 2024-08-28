@@ -1,6 +1,6 @@
 import { createUser, getUser } from "~/server/queries.mjs";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import jwt, { verify } from "jsonwebtoken";
 
 export default defineEventHandler(async (event) => {
   const mode = getRouterParam(event, "mode");
@@ -86,6 +86,19 @@ export default defineEventHandler(async (event) => {
       };
     } else {
       return { status: 401, message: "bearer token does not exist" };
+    }
+  } else if (mode === "authorise") {
+    const secret: jwt.Secret = process.env.JWT_SECRET as string;
+    try {
+      const token = getRequestHeaders(event).authorization;
+      if (!token) return { status: 401, message: "user unauthorised" };
+      const strippedToken = token.slice(7);
+      jwt.verify(strippedToken, secret);
+      return { status: 200, message: "user authorised" };
+    } catch (error) {
+      // throw error;
+      // console.error(error);
+      return { status: 401, message: error };
     }
   }
 });

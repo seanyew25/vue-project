@@ -12,10 +12,6 @@ export default {
           if (!token) {
             return navigateTo("/login");
           } else {
-            // const authStore = useAuthStore();
-            // const isTokenValid = authStore.verifyToken();
-            // jose.decodeJwt;
-            // const isTokenValid = true;
             const info = jose.decodeJwt(token);
             const now = Math.floor(Date.now() / 1000);
             console.log(info);
@@ -27,6 +23,18 @@ export default {
               const parsedResponse = await response.json();
               if (response.status === 200) {
                 localStorage.setItem("token", parsedResponse.token);
+              } else {
+                navigateTo("/login");
+              }
+            } else {
+              const response = await fetch("/api/users/authorise", {
+                method: "POST",
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                },
+              });
+              if (response.status === 200) {
+                //do nothing
               } else {
                 navigateTo("/login");
               }
