@@ -14,7 +14,7 @@ export const getAnime = async () => {
     return result.rows;
   } catch (error) {
     console.error("Error executing query", error.stack);
-    throw error;
+    // throw error;
   }
 };
 
@@ -40,7 +40,7 @@ export const getSummary = async () => {
     return result.rows;
   } catch (error) {
     console.error("Error executing query", error.stack);
-    throw error;
+    // throw error;
   }
 };
 
@@ -60,6 +60,6 @@ export const getGenreSummary = async () => {
     return result.rows;
   } catch (error) {
     console.error("Error executing query", error.stack);
-    throw error;
+    // throw error;
   }
 };

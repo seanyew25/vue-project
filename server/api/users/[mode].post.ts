@@ -15,6 +15,7 @@ export default defineEventHandler(async (event) => {
           message: "User not found",
         };
       }
+      console.log(response);
       const match = await bcrypt.compare(password, response[0].password);
 
       if (match) {
@@ -50,7 +51,7 @@ export default defineEventHandler(async (event) => {
       } else return { status: 401, message: "incorrect password" };
     } catch (error) {
       console.error(error);
-      throw error;
+      // throw error;
     }
   } else if (mode === "signup") {
     try {
@@ -60,7 +61,7 @@ export default defineEventHandler(async (event) => {
       return result;
     } catch (error) {
       console.error(error);
-      throw error;
+      // throw error;
     }
   } else if (mode === "refresh") {
     const secret: jwt.Secret = process.env.JWT_SECRET as string;
