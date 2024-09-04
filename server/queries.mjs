@@ -2,7 +2,7 @@ import pg from "pg";
 const { Pool, Client } = pg;
 const pool = new Pool({
   user: "sean",
-  host: "postgres-db",
+  host: "localhost",
   database: "checklist",
   password: "seanyew123",
   port: 5432,
@@ -62,6 +62,31 @@ export const searchTask = async (name) => {
     name = name + "%";
     const results = await pool.query("SELECT * FROM task WHERE name ILIKE $1", [
       name,
+    ]);
+    return results.rows;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const createUser = async (username, email, password) => {
+  try {
+    const results = await pool.query(
+      "INSERT into USERS (username, email, password) VALUES ($1, $2, $3) RETURNING *",
+      [username, email, password]
+    );
+    return results.rows;
+  } catch (error) {
+    console.error(error);
+    return error;
+  }
+};
+
+export const getUser = async (username) => {
+  try {
+    const results = await pool.query("SELECT * FROM users WHERE username= $1", [
+      username,
     ]);
     return results.rows;
   } catch (error) {

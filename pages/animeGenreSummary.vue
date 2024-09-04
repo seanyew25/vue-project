@@ -35,7 +35,11 @@ export default {
   },
   methods: {
     async fetchAnimeSummaryByGenre() {
-      const response = await fetch("/api/anime/genres");
+      const response = await fetch("/api/anime/genres", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       const data = await response.json();
       this.chartOptions = {
         labels: data.genres,

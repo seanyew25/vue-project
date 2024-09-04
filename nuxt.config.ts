@@ -1,7 +1,16 @@
+import type { NuxtPage } from "nuxt/schema";
+
 export default defineNuxtConfig({
   compatibilityDate: "2024-04-03",
   devtools: { enabled: true },
-  modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt"],
+  ssr: false,
+
+  modules: ["@nuxtjs/tailwindcss", "shadcn-nuxt", "@pinia/nuxt"],
+
+  pinia: {
+    storesDirs: ["./stores/**"],
+  },
+
   shadcn: {
     /**
      * Prefix for all the imported component
