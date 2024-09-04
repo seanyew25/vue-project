@@ -56,7 +56,11 @@ export default {
   methods: {
     async fetchAllAnime() {
       try {
-        const response = await fetch("/api/anime");
+        const response = await fetch("/api/anime", {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
         const data = await response.json();
         this.anime = data;
       } catch (error) {

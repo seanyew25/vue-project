@@ -26,7 +26,11 @@ export default {
 
   methods: {
     async fetchAnimeByMonth() {
-      const response = await fetch("/api/anime/years");
+      const response = await fetch("/api/anime/years", {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
       const data = await response.json();
       this.options = {
         xaxis: {
