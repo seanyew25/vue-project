@@ -169,5 +169,7 @@ jobs:
 
             echo "${{ secrets.DOCKER_PASSWORD }}" | docker login --username "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
+            docker compose down
+            docker volume rm ec2-user_pgdata
             docker compose pull
             docker compose up -d
