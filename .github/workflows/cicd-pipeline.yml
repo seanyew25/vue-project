@@ -147,8 +147,7 @@ jobs:
 
       - name: Replace placeholders in Docker Compose file
         run: |
-          sed "s/{{TAG}}/$TAG/g" docker-compose.template.yml > docker-compose.yml
-          sed "s/{{JWT}}/$JWT/g" docker-compose.template.yml > docker-compose.yml
+          sed -e "s/{{TAG}}/$TAG/g" -e "s/{{JWT}}/$JWT/g" docker-compose.template.yml > docker-compose.yml
 
       - name: secure copy docker-compose.yml to ec2
         uses: appleboy/scp-action@v0.1.7
