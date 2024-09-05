@@ -51,7 +51,7 @@ export default defineEventHandler(async (event) => {
       } else return { status: 401, message: "incorrect password" };
     } catch (error) {
       console.error(error);
-      // throw error;
+      return { status: 501, error: error };
     }
   } else if (mode === "signup") {
     try {
@@ -61,7 +61,7 @@ export default defineEventHandler(async (event) => {
       return result;
     } catch (error) {
       console.error(error);
-      // throw error;
+      return { status: 501, error: error };
     }
   } else if (mode === "refresh") {
     const secret: jwt.Secret = process.env.JWT_SECRET as string;
@@ -97,9 +97,7 @@ export default defineEventHandler(async (event) => {
       jwt.verify(strippedToken, secret);
       return { status: 200, message: "user authorised" };
     } catch (error) {
-      // throw error;
-      // console.error(error);
-      return { status: 401, message: error };
+      return { status: 501, error: error };
     }
   }
 });

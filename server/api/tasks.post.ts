@@ -16,6 +16,6 @@ export default defineEventHandler(async (event) => {
     return createTaskResult;
   } catch (error) {
     console.error(error);
-    throw error;
+    return { status: 501, error: error };
   }
 });
