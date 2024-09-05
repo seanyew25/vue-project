@@ -2,7 +2,7 @@ import pg from "pg";
 const { Pool, Client } = pg;
 const pool = new Pool({
   user: "sean",
-  host: "localhost",
+  host: "db",
   database: "checklist",
   password: "seanyew123",
   port: 5432,
@@ -19,7 +19,7 @@ export const getTasks = async () => {
     return result.rows;
   } catch (error) {
     console.error("Error executing query", error.stack);
-    throw error;
+    // throw error;
   }
 };
 
@@ -32,7 +32,7 @@ export const createTask = async (name, description, status) => {
     return result.rows;
   } catch (error) {
     console.error("Error executing create task", error.stack);
-    throw error;
+    // throw error;
   }
 };
 
@@ -53,7 +53,7 @@ export const updateTask = async (id, name, description, status) => {
     return results.rows;
   } catch (error) {
     console.error(error);
-    throw error;
+    // throw error;
   }
 };
 
@@ -88,6 +88,7 @@ export const getUser = async (username) => {
     const results = await pool.query("SELECT * FROM users WHERE username= $1", [
       username,
     ]);
+    // console.log(results);
     return results.rows;
   } catch (error) {
     console.error(error);

@@ -18,7 +18,7 @@ export default defineEventHandler(async (event) => {
     await jwt.verify(strippedToken, secret);
   } catch (error) {
     console.error(error);
-    throw error;
+    return { status: 501, error: error };
   }
   try {
     if (query.search) {
@@ -30,6 +30,6 @@ export default defineEventHandler(async (event) => {
     }
   } catch (error) {
     console.error(error);
-    throw error;
+    return { status: 501, error: error };
   }
 });

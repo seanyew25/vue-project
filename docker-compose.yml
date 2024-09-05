@@ -3,6 +3,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.vue-project
+    environment:
+      JWT_SECRET: 1c6f48ecb628b7162c9993bba2137e9607a171ba0044192321d74412bf5b4ea0
+
     container_name: vue-project
     restart: unless-stopped
     ports:

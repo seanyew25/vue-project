@@ -24,6 +24,6 @@ export default defineEventHandler(async (event) => {
     return results;
   } catch (error) {
     console.error(error);
-    throw error;
+    return { status: 501, error: error };
   }
 });

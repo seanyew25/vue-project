@@ -17,8 +17,7 @@ export default defineEventHandler(async (event) => {
     const secret: jwt.Secret = process.env.JWT_SECRET as string;
     await jwt.verify(strippedToken, secret);
   } catch (error) {
-    console.error(error);
-    throw error;
+    return { status: 501, error: error };
   }
   if (summaryType === "years") {
     const dates: string[] = [];
