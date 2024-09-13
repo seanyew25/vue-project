@@ -10,8 +10,8 @@ export default defineEventHandler(async (event) => {
       const { username, password } = body;
       const response = await getUser(username);
       if (!response || response.length === 0) {
+        setResponseStatus(event, 404);
         return {
-          status: 404,
           message: "User not found",
         };
       }
@@ -48,10 +48,14 @@ export default defineEventHandler(async (event) => {
           message: "successfully authenticated",
           token: accessToken,
         };
-      } else return { status: 401, message: "incorrect password" };
+      } else {
+        setResponseStatus(event, 401);
+        return { message: "incorrect password" };
+      }
     } catch (error) {
       console.error(error);
-      return { status: 501, error: error };
+      setResponseStatus(event, 501);
+      return { error: error };
     }
   } else if (mode === "signup") {
     try {
@@ -61,7 +65,8 @@ export default defineEventHandler(async (event) => {
       return result;
     } catch (error) {
       console.error(error);
-      return { status: 501, error: error };
+      setResponseStatus(event, 501);
+      return { error: error };
     }
   } else if (mode === "refresh") {
     const secret: jwt.Secret = process.env.JWT_SECRET as string;
@@ -72,7 +77,8 @@ export default defineEventHandler(async (event) => {
         jwt.verify(refreshToken, secret);
       } catch (error) {
         console.error(error);
-        return { status: 401, message: "refresh token expired" };
+        setResponseStatus(event, 401);
+        return { message: "refresh token expired" };
       }
       //@ts-ignore
       const id = jwt.decode(refreshToken, secret);
@@ -86,18 +92,29 @@ export default defineEventHandler(async (event) => {
         token: accessToken,
       };
     } else {
-      return { status: 401, message: "bearer token does not exist" };
+      setResponseStatus(event, 501);
+      return { message: "bearer token does not exist" };
     }
   } else if (mode === "authorise") {
     const secret: jwt.Secret = process.env.JWT_SECRET as string;
     try {
       const token = getRequestHeaders(event).authorization;
-      if (!token) return { status: 401, message: "user unauthorised" };
+      if (!token) {
+        setResponseStatus(event, 401);
+        return { message: "user unauthorised" };
+      }
       const strippedToken = token.slice(7);
       jwt.verify(strippedToken, secret);
-      return { status: 200, message: "user authorised" };
+      setResponseStatus(event, 200);
+      return { message: "user authorised" };
     } catch (error) {
-      return { status: 501, error: error };
+      if (error.name === "TokenExpiredError") {
+        setResponseStatus(event, 401);
+        return { error: "Expired token" };
+      } else {
+        setResponseStatus(event, 401);
+        return { error: error };
+      }
     }
   }
 });

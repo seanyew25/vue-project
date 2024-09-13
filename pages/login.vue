@@ -38,7 +38,6 @@ export default {
         });
         if (response.status === 200) {
           const parsedResponse = await response.json();
-          console.log(parsedResponse);
           localStorage.setItem("token", parsedResponse.token);
           navigateTo("/");
         }

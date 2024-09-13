@@ -1,49 +1,8 @@
 <script>
 import animeGenreSummary from "./animeGenreSummary.vue";
 import animeYearSummary from "./animeYearSummary.vue";
-import * as jose from "jose";
 
 export default {
-  setup() {
-    definePageMeta({
-      middleware: [
-        async function (to, from) {
-          const token = localStorage.getItem("token");
-          if (!token) {
-            return navigateTo("/login");
-          } else {
-            const info = jose.decodeJwt(token);
-            const now = Math.floor(Date.now() / 1000);
-            console.log(info);
-            console.log(now);
-            if (now > info.exp) {
-              const response = await fetch("/api/users/refresh", {
-                method: "POST",
-              });
-              const parsedResponse = await response.json();
-              if (response.status === 200) {
-                localStorage.setItem("token", parsedResponse.token);
-              } else {
-                navigateTo("/login");
-              }
-            } else {
-              const response = await fetch("api/users/authorise", {
-                method: "POST",
-                headers: {
-                  Authorisation: `Bearer ${token}`,
-                },
-              });
-              if (response.status === 200) {
-                //do nothing
-              } else {
-                navigateTo("/login");
-              }
-            }
-          }
-        },
-      ],
-    });
-  },
   components: {
     animeYearSummary,
     animeGenreSummary,

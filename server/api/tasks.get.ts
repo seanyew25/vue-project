@@ -7,7 +7,8 @@ export default defineEventHandler(async (event) => {
   // console.log(getRequestHeaders(event));
 
   if (!token) {
-    return { status: 401, message: "no authorization token provided" };
+    setResponseStatus(event, 401);
+    return { message: "no authorization token provided" };
   }
   // console.log(token);
 
@@ -17,8 +18,8 @@ export default defineEventHandler(async (event) => {
     const secret: jwt.Secret = process.env.JWT_SECRET as string;
     await jwt.verify(strippedToken, secret);
   } catch (error) {
-    console.error(error);
-    return { status: 501, error: error };
+    setResponseStatus(event, 401);
+    return { error: error };
   }
   try {
     if (query.search) {
@@ -29,7 +30,7 @@ export default defineEventHandler(async (event) => {
       return tasks;
     }
   } catch (error) {
-    console.error(error);
-    return { status: 501, error: error };
+    setResponseStatus(event, 401);
+    return { error: error };
   }
 });
