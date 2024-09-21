@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+
+kind: Deployment
+metadata:
+  name: project-pod
+  labels:
+    version: "1"
+spec: #spec for deployment
+  replicas: 2
+  selector:
+    matchLabels:
+      app: vue
+  template:
+    metadata:
+      labels:
+        app: vue
+    spec: #spec for pods
+      containers:
+        - name: vue-project
+          image: "seanyew25/vue-project-app:8f7d7d0"
+          imagePullPolicy: Never
+          resources:
+            requests:
+              memory: "64Mi"
+              cpu: "250m"
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+          ports:
+            - containerPort: 3000
+      imagePullSecrets:
+        - name: regcred
