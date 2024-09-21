@@ -102,8 +102,8 @@ jobs:
         id: get_secrets
         run: |
           echo "JWT=${{ secrets.JWT_KEY }}" >> "$GITHUB_ENV"
-          echo "USER=${{ secrets.DB_USERNAME }}" >> "$GITHUB_ENV"
-          echo "PASSWORD=${{ secrets.DB_PASSWORD }}" >> "$GITHUB_ENV"
+          echo "DB_USERNAME=${{ secrets.DB_USERNAME }}" >> "$GITHUB_ENV"
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> "$GITHUB_ENV"
 
       - name: Create Docker Compose template
         run: |
